@@ -76,8 +76,7 @@ tab/
 ├── .gitignore          # Git 忽略配置
 ├── LICENSE             # GPL-3.0 开源协议
 ├── README.md           # 中文文档
-├── README_EN.md        # 英文文档
-└── dist/TabFlow.exe    # 打包产物
+└── README_EN.md        # 英文文档
 ```
 
 ---

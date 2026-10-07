@@ -77,8 +77,7 @@ tab/
 ├── .gitignore          # Git ignore configuration
 ├── LICENSE             # GNU GPL-3.0 License
 ├── README.md           # Chinese documentation
-├── README_EN.md        # English documentation
-└── dist/TabFlow.exe    # Standalone executable
+└── README_EN.md        # English documentation
 ```
 
 ---
