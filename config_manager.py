@@ -38,7 +38,6 @@ DEFAULT_CONFIG = {
     "shortcut_mode": "ctrl_tab", # "ctrl_tab" or "ctrl_page"
     "reverse_scroll": False,
     "wheel_sensitivity": 120,
-    "all_apps_mode": False,
     "minimize_to_tray": True,
     "autostart": False,
     "language": "zh", # "zh" or "en"

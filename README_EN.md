@@ -19,7 +19,7 @@ Lightweight Windows mouse gesture tool: **Hold Right Mouse Button + Scroll Wheel
 - **Low Latency**: Based on Win32 low-level mouse hook (`WH_MOUSE_LL`). Mouse move events pass through directly with minimal resource usage.
 - **Multi-App Support**:
   - Default presets for Chrome, Edge, Firefox, Brave, Opera, Vivaldi, Arc, Zen, etc.
-  - Supports adding custom target processes (e.g. VS Code `code.exe`), or toggling Global Mode.
+  - Supports adding custom target processes (e.g. VS Code `code.exe` or any multi-tab application).
 - **System Integration**:
   - Consistent icon across Windows Taskbar and Task Manager via `AppUserModelID`.
   - High-DPI scaling support.

@@ -57,7 +57,7 @@ class TabFlowApp(tk.Tk):
         
         self.title(self.i18n.t("app_title"))
         self.geometry("660x780")
-        self.minsize(580, 700)
+        self.minsize(580, 680)
         self.configure(bg=THEME["bg"])
 
         # 查找应用图标 (优先支持 PyInstaller 单文件 _MEIPASS 目录，兼顾 exe 目录及源码目录)
@@ -101,7 +101,6 @@ class TabFlowApp(tk.Tk):
         self.var_enabled = tk.BooleanVar(value=self.config_mgr.get("enabled", True))
         self.var_shortcut_mode = tk.StringVar(value=self.config_mgr.get("shortcut_mode", "ctrl_tab"))
         self.var_reverse_scroll = tk.BooleanVar(value=self.config_mgr.get("reverse_scroll", False))
-        self.var_all_apps = tk.BooleanVar(value=self.config_mgr.get("all_apps_mode", False))
         self.var_min_tray = tk.BooleanVar(value=self.config_mgr.get("minimize_to_tray", True))
         self.var_autostart = tk.BooleanVar(value=self.config_mgr.get("autostart", False))
         self.var_sensitivity = tk.IntVar(value=self.config_mgr.get("wheel_sensitivity", 120))
@@ -117,8 +116,8 @@ class TabFlowApp(tk.Tk):
         self._init_styles()
         self._build_header()
         self._build_live_card()
-        self._build_tabs()
-        self._build_bottom_bar()
+        self._build_bottom_bar() # 底部按钮栏优先停靠底部，确保随时完全可见
+        self._build_tabs()       # 选项卡区域自适应填满中间剩余空间
 
         # Window protocol
         self.protocol("WM_DELETE_WINDOW", self._on_close_window)
@@ -257,7 +256,7 @@ class TabFlowApp(tk.Tk):
 
     def _build_tabs(self):
         self.notebook = ttk.Notebook(self)
-        self.notebook.pack(fill=tk.BOTH, expand=True, padx=24, pady=(0, 14))
+        self.notebook.pack(fill=tk.BOTH, expand=True, padx=24, pady=(0, 10))
 
         # Tab 1: Gestures & Shortcuts
         self.tab_settings = tk.Frame(self.notebook, bg=THEME["card"])
@@ -341,24 +340,6 @@ class TabFlowApp(tk.Tk):
             bg=THEME["card"], fg=THEME["text_muted"]
         )
         self.lbl_sens_tip.pack(side=tk.LEFT)
-
-        # Divider
-        tk.Frame(frame, height=1, bg=THEME["card_border"]).pack(fill=tk.X, padx=20, pady=12)
-
-        # Gesture Scope
-        self.lbl_group3 = tk.Label(
-            frame, text=self.i18n.t("group_scope"), font=("Microsoft YaHei UI", 10, "bold"),
-            bg=THEME["card"], fg=THEME["text_title"]
-        )
-        self.lbl_group3.pack(anchor=tk.W, padx=20, pady=(4, 6))
-
-        self.cb_all = tk.Checkbutton(
-            frame, text=self.i18n.t("chk_all_apps"),
-            variable=self.var_all_apps,
-            font=("Microsoft YaHei UI", 9), bg=THEME["card"], fg=THEME["text_body"],
-            selectcolor=THEME["input_bg"], activebackground=THEME["card"], activeforeground=THEME["text_title"]
-        )
-        self.cb_all.pack(anchor=tk.W, padx=24, pady=3)
 
     def _init_tab_browsers(self):
         frame = self.tab_browsers
@@ -513,7 +494,7 @@ class TabFlowApp(tk.Tk):
 
     def _build_bottom_bar(self):
         bar = tk.Frame(self, bg=THEME["bg"])
-        bar.pack(fill=tk.X, padx=24, pady=(0, 20))
+        bar.pack(side=tk.BOTTOM, fill=tk.X, padx=24, pady=(6, 16))
 
         self.btn_min = tk.Button(
             bar, text=self.i18n.t("btn_min_tray"), font=("Microsoft YaHei UI", 9),
@@ -593,8 +574,6 @@ class TabFlowApp(tk.Tk):
         self.cb_rev.config(text=self.i18n.t("chk_reverse_scroll"))
         self.lbl_sens.config(text=self.i18n.t("lbl_sensitivity"))
         self.lbl_sens_tip.config(text=self.i18n.t("lbl_sens_tip"))
-        self.lbl_group3.config(text=self.i18n.t("group_scope"))
-        self.cb_all.config(text=self.i18n.t("chk_all_apps"))
 
         # Tab 2
         self.lbl_browser_title.config(text=self.i18n.t("lbl_browser_list"))
@@ -749,7 +728,6 @@ class TabFlowApp(tk.Tk):
         self.config_mgr.set("shortcut_mode", self.var_shortcut_mode.get())
         self.config_mgr.set("reverse_scroll", self.var_reverse_scroll.get())
         self.config_mgr.set("wheel_sensitivity", self.var_sensitivity.get())
-        self.config_mgr.set("all_apps_mode", self.var_all_apps.get())
         self.config_mgr.set("minimize_to_tray", self.var_min_tray.get())
         self.config_mgr.set("enabled", self.var_enabled.get())
         self.config_mgr.set("language", self.var_language.get())

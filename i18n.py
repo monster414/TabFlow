@@ -28,8 +28,6 @@ TRANSLATIONS = {
         "chk_reverse_scroll": "反转滚轮方向（向上滚动切换至右侧标签，向下至左侧）",
         "lbl_sensitivity": "单次切换滚轮刻度：",
         "lbl_sens_tip": "(默认 120 = 拨动一格切换 1 次)",
-        "group_scope": "生效范围模式",
-        "chk_all_apps": "全局应用模式（不仅限浏览器，在 VS Code、文件管理器等所有软件均生效）",
         # Tab 2: Browsers
         "lbl_browser_list": "勾选允许手势生效的浏览器：",
         "btn_scan": "🔍 扫描运行中的浏览器",
@@ -95,8 +93,6 @@ TRANSLATIONS = {
         "chk_reverse_scroll": "Reverse scroll direction (Up switches Right, Down switches Left)",
         "lbl_sensitivity": "Wheel ticks per switch: ",
         "lbl_sens_tip": "(Default 120 = 1 notch per switch)",
-        "group_scope": "Scope of Application",
-        "chk_all_apps": "Global App Mode (Enable across all software, e.g. VS Code, Explorer)",
         # Tab 2: Browsers
         "lbl_browser_list": "Enable gestures for selected browsers:",
         "btn_scan": "🔍 Scan Running Browsers",

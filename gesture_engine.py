@@ -80,7 +80,6 @@ class GestureEngine:
     def __init__(self, config=None):
         self.config = config or {}
         self.target_browsers = set(b.lower() for b in self.config.get("target_browsers", []))
-        self.all_apps_mode = self.config.get("all_apps_mode", False)
         self.shortcut_mode = self.config.get("shortcut_mode", "ctrl_tab")
         self.reverse_scroll = self.config.get("reverse_scroll", False)
         self.wheel_sensitivity = self.config.get("wheel_sensitivity", 120)
@@ -101,7 +100,6 @@ class GestureEngine:
     def update_config(self, config):
         self.config = config
         self.target_browsers = set(b.lower() for b in self.config.get("target_browsers", []))
-        self.all_apps_mode = self.config.get("all_apps_mode", False)
         self.shortcut_mode = self.config.get("shortcut_mode", "ctrl_tab")
         self.reverse_scroll = self.config.get("reverse_scroll", False)
         self.wheel_sensitivity = max(30, int(self.config.get("wheel_sensitivity", 120)))
@@ -173,11 +171,6 @@ class GestureEngine:
                 user32.AttachThreadInput(cur_tid, target_tid, False)
 
     def _is_target_window(self, pt):
-        if self.all_apps_mode:
-            hwnd = user32.WindowFromPoint(pt)
-            root = self._get_main_root(hwnd) if hwnd else 0
-            return True, root or hwnd, "all_apps"
-
         # Check window under cursor, and also check active foreground window
         candidates = []
         hwnd = user32.WindowFromPoint(pt)
