@@ -41,6 +41,8 @@ WNDENUMPROC = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
 user32.EnumWindows.argtypes = [WNDENUMPROC, wintypes.LPARAM]
 user32.EnumWindows.restype = wintypes.BOOL
 user32.mouse_event.argtypes = [wintypes.DWORD, wintypes.DWORD, wintypes.DWORD, wintypes.DWORD, ctypes.c_size_t]
+user32.GetAsyncKeyState.argtypes = [ctypes.c_int]
+user32.GetAsyncKeyState.restype = wintypes.SHORT
 
 MOUSEEVENTF_RIGHTDOWN = 0x0008
 MOUSEEVENTF_RIGHTUP = 0x0010
@@ -219,10 +221,17 @@ class GestureEngine:
         user32.keybd_event(VK_ESCAPE, 0, KEYEVENTF_KEYUP, 0)
 
     def release_modifiers(self):
-        scan_ctrl = user32.MapVirtualKeyW(VK_CONTROL, 0)
-        scan_shift = user32.MapVirtualKeyW(VK_SHIFT, 0)
-        user32.keybd_event(VK_CONTROL, scan_ctrl, KEYEVENTF_KEYUP, 0)
-        user32.keybd_event(VK_SHIFT, scan_shift, KEYEVENTF_KEYUP, 0)
+        # Only synthesize KEYUP if the modifier is NOT physically held down by the user,
+        # preventing interruption of normal operations (e.g. Ctrl/Shift multi-select in Explorer).
+        ctrl_pressed = bool(user32.GetAsyncKeyState(VK_CONTROL) & 0x8000)
+        shift_pressed = bool(user32.GetAsyncKeyState(VK_SHIFT) & 0x8000)
+
+        if not ctrl_pressed:
+            scan_ctrl = user32.MapVirtualKeyW(VK_CONTROL, 0)
+            user32.keybd_event(VK_CONTROL, scan_ctrl, KEYEVENTF_KEYUP, 0)
+        if not shift_pressed:
+            scan_shift = user32.MapVirtualKeyW(VK_SHIFT, 0)
+            user32.keybd_event(VK_SHIFT, scan_shift, KEYEVENTF_KEYUP, 0)
 
     def trigger_switch(self, go_left: bool):
         # Ensure browser window receives keyboard shortcuts
@@ -372,13 +381,12 @@ class GestureEngine:
             if self.rbutton_down:
                 self.rbutton_down = False
                 self.has_switched = False
+                self.release_modifiers()
                 if self.on_state_callback:
                     try:
                         self.on_state_callback(False, "")
                     except Exception:
                         pass
-            # Force release Ctrl/Shift so any left-click is 100% clean
-            self.release_modifiers()
 
         return user32.CallNextHookEx(None, nCode, wParam, lParam)
 
