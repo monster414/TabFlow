@@ -23,7 +23,7 @@ Lightweight Windows mouse gesture tool: **Hold Right Mouse Button + Scroll Wheel
 - **System Integration**:
   - Consistent icon across Windows Taskbar and Task Manager via `AppUserModelID`.
   - High-DPI scaling support.
-  - Single-instance mutex guard, minimize to system tray, and Windows startup auto-launch.
+  - Single-instance mutex guard, minimize to system tray, Windows startup auto-launch, and auto-minimize on startup.
 - **Multi-Language Support**: Built-in Chinese and English interface, automatically matching system locale or toggled on the fly.
 
 ---

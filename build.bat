@@ -26,7 +26,7 @@ if not exist "app.ico" (
 )
 
 echo [2/3] 执行 PyInstaller 静态编译打包...
-python -m PyInstaller --name "TabFlow" --onefile --windowed --icon "app.ico" --hidden-import "pystray._win32" --collect-all "pystray" --collect-all "PIL" --add-data "app.ico;." --clean main.py
+python -m PyInstaller --name "TabFlow" --onefile --windowed --icon "app.ico" --hidden-import "pystray._win32" --collect-all "pystray" --collect-all "PIL" --exclude-module "numpy" --add-data "app.ico;." --clean main.py
 
 if %errorlevel% equ 0 (
     echo.

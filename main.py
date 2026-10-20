@@ -48,8 +48,12 @@ POPULAR_BROWSERS = [
 ]
 
 class TabFlowApp(tk.Tk):
-    def __init__(self):
+    def __init__(self, start_minimized=False):
         super().__init__()
+        
+        # 若指定了开机自动最小化，立即 withdraw 避免窗口闪烁
+        if start_minimized:
+            self.withdraw()
         
         # Managers & Config
         self.config_mgr = ConfigManager()
@@ -103,6 +107,7 @@ class TabFlowApp(tk.Tk):
         self.var_reverse_scroll = tk.BooleanVar(value=self.config_mgr.get("reverse_scroll", False))
         self.var_min_tray = tk.BooleanVar(value=self.config_mgr.get("minimize_to_tray", True))
         self.var_autostart = tk.BooleanVar(value=self.config_mgr.get("autostart", False))
+        self.var_autostart_min = tk.BooleanVar(value=self.config_mgr.get("autostart_minimized", False))
         self.var_sensitivity = tk.IntVar(value=self.config_mgr.get("wheel_sensitivity", 120))
         self.var_language = tk.StringVar(value=self.i18n.lang)
 
@@ -128,6 +133,9 @@ class TabFlowApp(tk.Tk):
 
         # Start Tray
         self.tray.start()
+
+        if start_minimized:
+            self.withdraw()
 
     def _init_styles(self):
         style = ttk.Style()
@@ -440,6 +448,15 @@ class TabFlowApp(tk.Tk):
         )
         self.cb_auto.pack(anchor=tk.W, padx=24, pady=4)
 
+        self.cb_auto_min = tk.Checkbutton(
+            frame, text=self.i18n.t("chk_autostart_minimized"),
+            variable=self.var_autostart_min,
+            font=("Microsoft YaHei UI", 9), bg=THEME["card"], fg=THEME["text_body"],
+            selectcolor=THEME["input_bg"], activebackground=THEME["card"], activeforeground=THEME["text_title"],
+            command=self._on_toggle_autostart_min
+        )
+        self.cb_auto_min.pack(anchor=tk.W, padx=44, pady=2)
+
         # Language selection row
         lang_box = tk.Frame(frame, bg=THEME["card"])
         lang_box.pack(anchor=tk.W, padx=24, pady=6)
@@ -586,6 +603,7 @@ class TabFlowApp(tk.Tk):
         self.lbl_system_group.config(text=self.i18n.t("group_preference"))
         self.cb_min.config(text=self.i18n.t("chk_minimize_tray"))
         self.cb_auto.config(text=self.i18n.t("chk_autostart"))
+        self.cb_auto_min.config(text=self.i18n.t("chk_autostart_minimized"))
         self.lbl_lang_setting.config(text=self.i18n.t("lbl_language"))
         self.lbl_guide_title.config(text=self.i18n.t("guide_title"))
         tips = [
@@ -708,7 +726,14 @@ class TabFlowApp(tk.Tk):
         self.after(0, self._toggle_service)
 
     def _on_toggle_autostart(self):
-        self.config_mgr.set_autostart(self.var_autostart.get())
+        auto_state = self.var_autostart.get()
+        self.config_mgr.set_autostart(auto_state, minimized=self.var_autostart_min.get())
+
+    def _on_toggle_autostart_min(self):
+        min_state = self.var_autostart_min.get()
+        if min_state and not self.var_autostart.get():
+            self.var_autostart.set(True)
+        self.config_mgr.set_autostart(self.var_autostart.get(), minimized=min_state)
 
     def _save_and_apply_config(self, show_toast=True):
         # Assemble target browsers
@@ -731,6 +756,7 @@ class TabFlowApp(tk.Tk):
         self.config_mgr.set("minimize_to_tray", self.var_min_tray.get())
         self.config_mgr.set("enabled", self.var_enabled.get())
         self.config_mgr.set("language", self.var_language.get())
+        self.config_mgr.set_autostart(self.var_autostart.get(), minimized=self.var_autostart_min.get())
 
         self.engine.update_config(self.config_mgr.config)
         self.lbl_custom_list.config(text=self._get_custom_browsers_display())
@@ -782,16 +808,21 @@ if __name__ == "__main__":
         except Exception:
             pass
 
+    start_min = ("--minimized" in sys.argv or "-m" in sys.argv or "--tray" in sys.argv)
+
     # 3. 单实例互斥体 (Mutex) 保护，防止多开冲突
     mutex_name = "Local\\TabFlow_SingleInstance_Mutex_2026"
     h_mutex = kernel32.CreateMutexW(None, False, mutex_name)
     if kernel32.GetLastError() == 183: # ERROR_ALREADY_EXISTS
-        # Find existing TabFlow window and bring to front
-        hwnd = user32.FindWindowW(None, "TabFlow - 浏览器标签页鼠标切换手势") or user32.FindWindowW(None, "TabFlow - Mouse Gesture Tab Switcher")
-        if hwnd:
-            user32.ShowWindow(hwnd, 9) # SW_RESTORE
-            user32.SetForegroundWindow(hwnd)
+        if not start_min:
+            # Find existing TabFlow window and bring to front
+            hwnd = user32.FindWindowW(None, "TabFlow - 浏览器标签页鼠标切换手势") or user32.FindWindowW(None, "TabFlow - Mouse Gesture Tab Switcher")
+            if not hwnd:
+                hwnd = user32.FindWindowExW(0, 0, None, "TabFlow - 浏览器标签页鼠标切换手势") or user32.FindWindowExW(0, 0, None, "TabFlow - Mouse Gesture Tab Switcher")
+            if hwnd:
+                user32.ShowWindow(hwnd, 9) # SW_RESTORE
+                user32.SetForegroundWindow(hwnd)
         sys.exit(0)
 
-    app = TabFlowApp()
+    app = TabFlowApp(start_minimized=start_min)
     app.mainloop()

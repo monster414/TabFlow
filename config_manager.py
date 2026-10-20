@@ -40,6 +40,7 @@ DEFAULT_CONFIG = {
     "wheel_sensitivity": 120,
     "minimize_to_tray": True,
     "autostart": False,
+    "autostart_minimized": False,
     "language": "zh", # "zh" or "en"
     "target_browsers": DEFAULT_BROWSERS,
 }
@@ -81,13 +82,18 @@ class ConfigManager:
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER, REG_RUN_KEY, 0, winreg.KEY_READ) as key:
                 val, _ = winreg.QueryValueEx(key, APP_NAME)
                 self.config["autostart"] = bool(val)
+                if val:
+                    self.config["autostart_minimized"] = ("--minimized" in str(val))
         except FileNotFoundError:
             self.config["autostart"] = False
         except Exception:
             pass
 
-    def set_autostart(self, enable: bool):
+    def set_autostart(self, enable: bool, minimized: bool = None):
+        if minimized is None:
+            minimized = self.config.get("autostart_minimized", False)
         self.config["autostart"] = enable
+        self.config["autostart_minimized"] = minimized
         self.save()
         try:
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER, REG_RUN_KEY, 0, winreg.KEY_SET_VALUE) as key:
@@ -96,13 +102,22 @@ class ConfigManager:
                         cmd = f'"{sys.executable}"'
                     else:
                         base_dir = os.path.dirname(os.path.abspath(__file__))
-                        run_bat = os.path.join(base_dir, "run.bat")
-                        if os.path.exists(run_bat):
-                            cmd = f'"{run_bat}"'
+                        dist_exe = os.path.join(base_dir, "dist", "TabFlow.exe")
+                        if os.path.exists(dist_exe):
+                            cmd = f'"{dist_exe}"'
                         else:
-                            python_exe = sys.executable.replace("python.exe", "pythonw.exe")
                             main_py = os.path.join(base_dir, "main.py")
-                            cmd = f'"{python_exe}" "{main_py}"'
+                            python_exe = sys.executable.replace("python.exe", "pythonw.exe")
+                            if os.path.exists(python_exe):
+                                cmd = f'"{python_exe}" "{main_py}"'
+                            else:
+                                run_bat = os.path.join(base_dir, "run.bat")
+                                if os.path.exists(run_bat):
+                                    cmd = f'"{run_bat}"'
+                                else:
+                                    cmd = f'"{sys.executable}" "{main_py}"'
+                    if minimized:
+                        cmd += " --minimized"
                     winreg.SetValueEx(key, APP_NAME, 0, winreg.REG_SZ, cmd)
                 else:
                     try:
